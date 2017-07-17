@@ -1,5 +1,7 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
+src/main/resources/application.properties
+.mvn
 
 ### STS ###
 .apt_generated

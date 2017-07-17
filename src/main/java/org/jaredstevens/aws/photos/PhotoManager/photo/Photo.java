@@ -4,6 +4,8 @@
 package org.jaredstevens.aws.photos.PhotoManager.photo;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.time.ZonedDateTime;
 
@@ -16,6 +18,7 @@ import java.time.ZonedDateTime;
 @Entity
 public class Photo {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long photoId;
 	private String name;
 	private String description;
