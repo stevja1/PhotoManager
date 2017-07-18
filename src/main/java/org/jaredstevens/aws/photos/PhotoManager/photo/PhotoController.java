@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -43,5 +41,10 @@ public class PhotoController {
 			LOGGER.warn("IOException thrown while writing image to output stream.", e);
 			return null;
 		}
+	}
+
+	@RequestMapping(value = "/photo/buildIndex")
+	public void buildIndex() {
+		this.photoService.buildIndex();
 	}
 }

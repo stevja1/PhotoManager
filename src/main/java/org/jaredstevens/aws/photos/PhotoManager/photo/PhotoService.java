@@ -3,20 +3,26 @@
  */
 package org.jaredstevens.aws.photos.PhotoManager.photo;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ListObjectsRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.jaredstevens.aws.photos.PhotoManager.utils.AWSUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.Properties;
 
 @Service
 public class PhotoService {
-	private Properties properties;
+	private static Logger LOGGER = LoggerFactory.getLogger(PhotoService.class);
 
 	public PhotoService() {
-		this.properties = new Properties();
 	}
 
 	@Value("${aws.accessKey}")
@@ -25,8 +31,17 @@ public class PhotoService {
 	@Value("${aws.secretKey}")
 	private String secretKey;
 
-	@Value("${aws.bucketName}")
-	private String bucketName;
+	@Value("${aws.sourceBucketName}")
+	private String sourceBucketName;
+
+	@Value("${aws.sourcePrefix}")
+	private String sourcePrefix;
+
+	@Value("${aws.targetBucketName}")
+	private String targetBucketName;
+
+	@Value("${aws.targetPrefix}")
+	private String targetPrefix;
 
 	@Autowired
 	private IPhoto photoDb;
@@ -44,7 +59,48 @@ public class PhotoService {
 	}
 
 	public InputStream getRawPhoto(long photoId) {
-		final String key = "Photos/2009-10-28 19.13.32.jpg";
-		return AWSUtils.getS3InputStream(this.accessKey, this.secretKey, this.bucketName, key);
+		final Photo photo = this.get(photoId);
+		final String key = photo.getUri();
+		return AWSUtils.getS3InputStream(this.accessKey, this.secretKey, this.sourceBucketName, key);
+	}
+
+	public void buildIndex() {
+		LOGGER.info("Listing objects...");
+		final AmazonS3 client = AWSUtils.getS3Client(this.accessKey, this.secretKey);
+		final String delimiter = "";
+		ListObjectsRequest listObjectsRequest = new ListObjectsRequest(this.sourceBucketName, this.sourcePrefix, "", delimiter, 5);
+		ObjectListing listing = client.listObjects(listObjectsRequest);
+
+		boolean loop = false;
+		if(listing.getObjectSummaries().size() > 0) {
+			loop = true;
+		}
+
+		// Iterate over pages of keys
+		while(loop) {
+			LOGGER.info("Got object list. Listing {} objects.", listing.getObjectSummaries().size());
+			// Process each key
+			for(S3ObjectSummary prefix : listing.getObjectSummaries()) {
+				LOGGER.info("Key: {}", prefix.getKey());
+				// This is where the processor needs to go
+				try {
+					// Skip directories
+					ObjectMetadata metaData = client.getObjectMetadata(this.sourceBucketName, prefix.getKey());
+					if(metaData.getContentType().equals("application/x-directory")) continue;
+					// Process files
+					Photo photo = PhotoProcessing.processPhoto(client, this.sourceBucketName, prefix.getKey(), this.targetBucketName, this.targetPrefix);
+					this.save(photo);
+				} catch(IOException e) {
+					LOGGER.warn("There was a problem processing file: {}", prefix.getKey(), e);
+				}
+			}
+			if(listing.isTruncated()) {
+				LOGGER.info("Getting the next page of keys...");
+				listing = client.listNextBatchOfObjects(listing);
+			} else {
+				loop = false;
+			}
+		}
+		LOGGER.info("Done.");
 	}
 }
