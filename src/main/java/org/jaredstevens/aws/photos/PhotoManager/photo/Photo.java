@@ -3,10 +3,7 @@
  */
 package org.jaredstevens.aws.photos.PhotoManager.photo;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.ZonedDateTime;
 
 /**
@@ -24,6 +21,7 @@ public class Photo {
 	private String description;
 	private String originalFilename;
 	private String thumbnailUri;
+	@Column(unique = true)
 	private String uri;
 	private int width;
 	private int height;

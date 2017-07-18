@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 @RestController
 public class PhotoController {
@@ -28,6 +29,11 @@ public class PhotoController {
 	@RequestMapping(value = "/photo", method = RequestMethod.PUT)
 	public void update(@RequestBody Photo photo) {
 		this.photoService.save(photo);
+	}
+
+	@RequestMapping(value = "/photo")
+	public List<Photo> getAllPhotos() {
+		return this.photoService.getAllPhotos();
 	}
 
 	@RequestMapping(value = "/photo/{photoId}", produces = MediaType.IMAGE_JPEG_VALUE)

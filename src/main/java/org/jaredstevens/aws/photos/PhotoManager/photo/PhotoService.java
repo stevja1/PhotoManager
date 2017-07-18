@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class PhotoService {
@@ -56,6 +58,11 @@ public class PhotoService {
 
 	public Photo get(long photoId) {
 		return this.photoDb.findOne(photoId);
+	}
+	public List<Photo> getAllPhotos() {
+		List<Photo> photos = new ArrayList<>();
+		this.photoDb.findAll().forEach(photos::add);
+		return photos;
 	}
 
 	public InputStream getRawPhoto(long photoId) {
