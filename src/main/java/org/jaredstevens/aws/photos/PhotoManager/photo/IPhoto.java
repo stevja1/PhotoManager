@@ -3,7 +3,7 @@
  */
 package org.jaredstevens.aws.photos.PhotoManager.photo;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface IPhoto extends CrudRepository<Photo, Long> {
+public interface IPhoto extends PagingAndSortingRepository<Photo, Long> {
 }

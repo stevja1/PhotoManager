@@ -68,9 +68,9 @@ public class PhotoProcessing {
 		final File thumbnailFile = new File("TempThumbnailFile");
 		ImageIO.write(thumbnail, "jpg", thumbnailFile);
 		LOGGER.info("Uploading thumbnail.");
-		final String thumbnailKey = PhotoProcessing.getHash(thumbnailFile);
+		final String thumbnailKey = String.format("%s/%s", targetPrefix, PhotoProcessing.getHash(thumbnailFile));
 		photo.setThumbnailUri(thumbnailKey);
-		PutObjectResult result = client.putObject(targetBucketName, targetPrefix+"/"+thumbnailKey, thumbnailFile);
+		PutObjectResult result = client.putObject(targetBucketName, thumbnailKey, thumbnailFile);
 		LOGGER.info("Wrote thumbnail.");
 		return photo;
 	}

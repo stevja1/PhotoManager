@@ -7,6 +7,7 @@ import com.amazonaws.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,14 +32,27 @@ public class PhotoController {
 		this.photoService.save(photo);
 	}
 
-	@RequestMapping(value = "/photo")
-	public List<Photo> getAllPhotos() {
-		return this.photoService.getAllPhotos();
+	@RequestMapping(value = "/photo", method = RequestMethod.GET)
+	public List<Photo> getAllPhotos(Pageable pageInfo) {
+		return this.photoService.getAllPhotos(pageInfo);
 	}
 
 	@RequestMapping(value = "/photo/{photoId}", produces = MediaType.IMAGE_JPEG_VALUE)
 	public @ResponseBody byte[] getRawPhoto(@PathVariable long photoId) {
 		final InputStream inStream = this.photoService.getRawPhoto(photoId);
+		try {
+			byte[] rawImage = IOUtils.toByteArray(inStream);
+			inStream.close();
+			return rawImage;
+		} catch(IOException e) {
+			LOGGER.warn("IOException thrown while writing image to output stream.", e);
+			return null;
+		}
+	}
+
+	@RequestMapping(value = "/thumbnail/{photoId}", produces = MediaType.IMAGE_JPEG_VALUE)
+	public @ResponseBody byte[] getRawThumbnail(@PathVariable long photoId) {
+		final InputStream inStream = this.photoService.getRawThumbnail(photoId);
 		try {
 			byte[] rawImage = IOUtils.toByteArray(inStream);
 			inStream.close();

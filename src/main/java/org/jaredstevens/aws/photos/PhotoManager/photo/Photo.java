@@ -3,6 +3,8 @@
  */
 package org.jaredstevens.aws.photos.PhotoManager.photo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 
@@ -109,6 +111,7 @@ public class Photo {
 		this.dateTaken = dateTaken;
 	}
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ssZ")
 	public ZonedDateTime getUpdated() {
 		return updated;
 	}

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -59,15 +60,23 @@ public class PhotoService {
 	public Photo get(long photoId) {
 		return this.photoDb.findOne(photoId);
 	}
-	public List<Photo> getAllPhotos() {
+
+	public List<Photo> getAllPhotos(Pageable pageInfo) {
 		List<Photo> photos = new ArrayList<>();
-		this.photoDb.findAll().forEach(photos::add);
+		this.photoDb.findAll(pageInfo).forEach(photos::add);
+//		this.photoDb.findAll().forEach(photos::add);
 		return photos;
 	}
 
 	public InputStream getRawPhoto(long photoId) {
 		final Photo photo = this.get(photoId);
 		final String key = photo.getUri();
+		return AWSUtils.getS3InputStream(this.accessKey, this.secretKey, this.sourceBucketName, key);
+	}
+
+	public InputStream getRawThumbnail(long photoId) {
+		final Photo photo = this.get(photoId);
+		final String key = photo.getThumbnailUri();
 		return AWSUtils.getS3InputStream(this.accessKey, this.secretKey, this.sourceBucketName, key);
 	}
 

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Page</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="/js/freewall.js"></script>
+    <script src="/js/APIConfig.js"></script>
+    <script src="/js/PhotoAPI.js"></script>
+    <script>
+        var page = 0;
+        PhotoAPI.getAllPhotos(page, getAllResponse);
+        function getAllResponse(result) {
+            console.log("Received list of "+result.length+" pictures from server.");
+            var container = $("#container");
+            for(var index in result) {
+                var image = $(document.createElement('img'));
+                image.attr("src", "/thumbnail/"+result[index].photoId);
+                image.addClass("item");
+                container.append(image);
+            }
+            console.log("Done.");
+        }
+
+
+    </script>
+    <style>
+    body {
+        margin: 0px;
+        padding: 0px;
+        background: black;
+    }
+    #container {
+      width: 100%;
+      margin: auto;
+    }
+    .item {
+      margin: 5px;
+    /*
+      background: rgb(135, 199, 135);
+      width: 320px;
+      height: 320px;
+      */
+    }
+
+
+
+    </style>
+</head>
+<body>
+<div id="container">
+</div>
+<script>
+    $(function() {
+      var wall = new Freewall("#container");
+      wall.fitWidth();
+    });
+
+    $(window).scroll(function() {
+   if($(window).scrollTop() + $(window).height() == $(document).height()) {
+   ++page;
+        PhotoAPI.getAllPhotos(page, getAllResponse);
+   }
+    });
+</script>
+</body>
+</html>
