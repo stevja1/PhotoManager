@@ -64,7 +64,12 @@ public class PhotoService {
 	public List<Photo> getAllPhotos(Pageable pageInfo) {
 		List<Photo> photos = new ArrayList<>();
 		this.photoDb.findAll(pageInfo).forEach(photos::add);
-//		this.photoDb.findAll().forEach(photos::add);
+		return photos;
+	}
+
+	public List<Photo> getPhotosWithoutAlbum(Pageable pageInfo) {
+		List<Photo> photos = new ArrayList<>();
+		this.photoDb.findByAlbumListIsNull(pageInfo).forEach(photos::add);
 		return photos;
 	}
 

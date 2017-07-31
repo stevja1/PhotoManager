@@ -3,10 +3,13 @@
  */
 package org.jaredstevens.aws.photos.PhotoManager.photo;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.jaredstevens.aws.photos.PhotoManager.album.Album;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 /**
  * A Photo Entity. This defines the table in the database that stores photo information.
@@ -19,6 +22,9 @@ public class Photo {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long photoId;
+	@JsonBackReference
+	@ManyToMany(mappedBy = "photoList", cascade = CascadeType.ALL)
+	private List<Album> albumList;
 	private String name;
 	private String description;
 	private String originalFilename;
@@ -37,6 +43,14 @@ public class Photo {
 
 	public void setPhotoId(long photoId) {
 		this.photoId = photoId;
+	}
+
+	public List<Album> getAlbumList() {
+		return albumList;
+	}
+
+	public void setAlbumList(List<Album> albumList) {
+		this.albumList = albumList;
 	}
 
 	public String getName() {
@@ -103,10 +117,12 @@ public class Photo {
 		this.size = size;
 	}
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ssZ")
 	public ZonedDateTime getDateTaken() {
 		return dateTaken;
 	}
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ssZ")
 	public void setDateTaken(ZonedDateTime dateTaken) {
 		this.dateTaken = dateTaken;
 	}
@@ -116,6 +132,7 @@ public class Photo {
 		return updated;
 	}
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ssZ")
 	public void setUpdated(ZonedDateTime updated) {
 		this.updated = updated;
 	}

@@ -32,9 +32,14 @@ public class PhotoController {
 		this.photoService.save(photo);
 	}
 
-	@RequestMapping(value = "/photo", method = RequestMethod.GET)
+	@RequestMapping(value = "/photo")
 	public List<Photo> getAllPhotos(Pageable pageInfo) {
 		return this.photoService.getAllPhotos(pageInfo);
+	}
+
+	@RequestMapping(value = "/photo/withoutAlbum")
+	public List<Photo> getPhotosWithoutAlbum(Pageable pageInfo) {
+		return this.photoService.getPhotosWithoutAlbum(pageInfo);
 	}
 
 	@RequestMapping(value = "/photo/{photoId}", produces = MediaType.IMAGE_JPEG_VALUE)
