@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -46,10 +47,20 @@ public class AlbumController {
 	}
 
 	@RequestMapping(value = "/album/addPhoto/{albumId}/{photoId}", method = RequestMethod.PUT)
-	public void addPhoto(@PathVariable Long photoId, @PathVariable Long albumId) {
+	public void addPhoto(@PathVariable Long albumId, @PathVariable Long photoId) {
+		LOGGER.info("Adding photo {} to album {}", photoId, albumId);
 		Photo photo = this.photoService.get(photoId);
 		Album album = this.albumService.get(albumId);
 		album.getPhotoList().add(photo);
+		this.albumService.save(album);
+	}
+
+	@RequestMapping(value = "/album/addPhotos/{albumId}", method = RequestMethod.PUT)
+	public void addPhotos(@PathVariable Long albumId, @RequestBody Long[] photoIds) {
+		LOGGER.info("Adding photos {} to album {}", photoIds, albumId);
+		List<Photo> photos = this.photoService.getPhotosInList(Arrays.asList(photoIds));
+		Album album = this.albumService.get(albumId);
+		album.getPhotoList().addAll(photos);
 		this.albumService.save(album);
 	}
 

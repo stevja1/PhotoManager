@@ -18,6 +18,10 @@ function selectImages(albumId) {
             imageOption.addClass("item");
             imagePicker.append(imageOption);
         }
+        var addButton = $(document.createElement('img'));
+        addButton.attr("src", "images/addPhotosToAlbum.png");
+        addButton.attr("onClick", "addPhotosToAlbum("+albumId+")");
+        container.append(addButton);
         $("#imagePickerContainer").imagepicker();
     }, function(err) {
         console.log("There was a problem fetching images without an album.");
@@ -31,4 +35,22 @@ function buildImagePickerSelect() {
     imagePicker.attr("multiple", "multiple");
     imagePicker.attr("id", "imagePickerContainer");
     return imagePicker;
+}
+
+function addPhotosToAlbum(albumId) {
+    var selectedPhotos = $("#imagePickerContainer").find(":selected");
+    var photoId = 0;
+    var photoIds = Array(selectedPhotos.length);
+    for(var index = 0; index < selectedPhotos.length; ++index) {
+        photoId = selectedPhotos[index].value;
+        photoIds[index] = photoId;
+        console.log("Add photo "+photoId+" to album "+albumId);
+    }
+    var promise = AlbumAPI.addPhotos(albumId, photoIds);
+    promise.then(function(result) {
+        viewAlbum(albumId);
+    }, function(err) {
+        console.log("There was a problem adding one of the photos to the album.");
+        console.log(err);
+    });
 }

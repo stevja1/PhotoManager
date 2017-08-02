@@ -4,6 +4,7 @@
 package org.jaredstevens.aws.photos.PhotoManager.album;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.jaredstevens.aws.photos.PhotoManager.photo.Photo;
 
@@ -25,7 +26,7 @@ public class Album {
 	private String name;
 	private String description;
 	private ZonedDateTime createDate;
-	@JsonManagedReference
+//	@JsonManagedReference
 	@ManyToMany(targetEntity = Photo.class, cascade = {CascadeType.ALL})
 	@JoinTable(name = "album_photo", joinColumns = { @JoinColumn(name = "album_id") },
 					inverseJoinColumns = { @JoinColumn(name = "photo_id") })

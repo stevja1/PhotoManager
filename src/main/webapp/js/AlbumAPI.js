@@ -2,11 +2,11 @@ function AlbumAPI() {}
 
 AlbumAPI.URL = APIConfig.ENDPOINT;
 
-AlbumAPI.save = function(id, name, description, callback) {
-    var endpoint = AlbumAPI.URL + "album/";
+AlbumAPI.save = function(id, name, description) {
+    var endpoint = AlbumAPI.URL + "album";
     var albumId = null;
     var requestMethod = "POST";
-    if(id != null) {
+    if(id != -1) {
         albumId = id;
         method = "PUT";
     }
@@ -29,8 +29,29 @@ AlbumAPI.addPhoto = function(albumId, photoId) {
 	var settings = {
         url: endpoint,
         method: requestMethod,
-        dataType: "json",
+        async: true
+    };
+
+    return Promise.resolve($.ajax(settings));
+};
+
+AlbumAPI.addPhotos = function(albumId, photoIds) {
+    var endpoint = AlbumAPI.URL + "album/addPhotos/" + albumId;
+    var requestMethod = "PUT";
+    var photoIdList = "[";
+    for(var i = 0; i < photoIds.length; ++i) {
+        photoIdList += photoIds[i] + ",";
+    }
+    photoIdList = photoIdList.substr(0, photoIdList.length - 1);
+    photoIdList += "]";
+    
+	var settings = {
+        url: endpoint,
+        method: requestMethod,
+        dataType: "xml text",
         contentType: "application/json",
+        data: photoIdList,
+        processData: false,
         async: true
     };
 
