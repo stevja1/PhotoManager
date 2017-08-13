@@ -89,8 +89,8 @@ AlbumAPI.get = function(albumId) {
     return Promise.resolve($.ajax(settings));
 };
 
-AlbumAPI.getAll = function() {
-    var endpoint = AlbumAPI.URL + "album";
+AlbumAPI.getAll = function(page) {
+    var endpoint = AlbumAPI.URL + "album?page="+page+"&size=30"";
 	var settings = {
         url: endpoint,
         dataType: "json",

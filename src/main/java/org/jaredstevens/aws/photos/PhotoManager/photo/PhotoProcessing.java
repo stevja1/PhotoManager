@@ -14,6 +14,9 @@ import com.drew.metadata.Metadata;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
+import org.apache.tika.detect.DefaultDetector;
+import org.apache.tika.detect.Detector;
+import org.apache.tika.mime.MediaType;
 import org.imgscalr.Scalr;
 import org.jaredstevens.aws.photos.PhotoManager.utils.AWSUtils;
 import org.slf4j.Logger;
@@ -35,6 +38,7 @@ import java.time.ZonedDateTime;
  */
 public class PhotoProcessing {
 	private static Logger LOGGER = LoggerFactory.getLogger(PhotoProcessing.class);
+	private static Detector mediaDetector = new DefaultDetector();
 	/**
 	 * This method does the following:
 	 * 1. Copy image to target bucket/prefix with new target name
@@ -48,13 +52,28 @@ public class PhotoProcessing {
 		final Photo photo = new Photo();
 		LOGGER.info("Gathering info about file: {}", sourceKey);
 		S3Object object = client.getObject(sourceBucketName, sourceKey);
+		if(object.getObjectMetadata().getContentLength() > 100000000) {
+			LOGGER.warn("Skipping file that's {} bytes.", object.getObjectMetadata().getContentLength());
+			return null;
+		}
 
 		InputStream inStream = object.getObjectContent();
 		byte[] rawImageData = IOUtils.toByteArray(inStream);
 		final String targetKey = PhotoProcessing.getHash(ByteSource.wrap(rawImageData));
 		final String targetUri = String.format("%s/%s", targetPrefix, targetKey);
 		LOGGER.info("Building photo object");
+		MediaType type = PhotoProcessing.mediaDetector.detect(new ByteArrayInputStream(rawImageData), new org.apache.tika.metadata.Metadata());
+		if(type.getBaseType() != MediaType.image("png")
+						&& type.getBaseType() != MediaType.image("jpeg")
+						&& type.getBaseType() != MediaType.image("pjpeg")) {
+			LOGGER.warn("Unable to process file of type {}", type.getType());
+			return null;
+		}
+
 		BufferedImage src = ImageIO.read(new ByteArrayInputStream(rawImageData));
+		if(src == null) {
+			return null;
+		}
 		photo.setHeight(src.getHeight());
 		photo.setWidth(src.getWidth());
 		photo.setOriginalFilename(sourceKey);

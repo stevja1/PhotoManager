@@ -10,4 +10,5 @@ import java.util.List;
 
 public interface IPhoto extends PagingAndSortingRepository<Photo, Long> {
 	List<Photo> findByAlbumListIsNull(Pageable pageInfo);
+	List<Photo> findByOriginalFilename(String originalFilename);
 }

@@ -50,7 +50,12 @@ public class PhotoService {
 	private IPhoto photoDb;
 
 	public Photo save(Photo photo) {
-		return this.photoDb.save(photo);
+		try {
+			return this.photoDb.save(photo);
+		} catch(Exception e) {
+			LOGGER.error("Exception was thrown when saving photo: ", e);
+			return null;
+		}
 	}
 
 	public void delete(long photoId) {
@@ -95,7 +100,7 @@ public class PhotoService {
 		LOGGER.info("Listing objects...");
 		final AmazonS3 client = AWSUtils.getS3Client(this.accessKey, this.secretKey);
 		final String delimiter = "";
-		ListObjectsRequest listObjectsRequest = new ListObjectsRequest(this.sourceBucketName, this.sourcePrefix, "", delimiter, 5);
+		ListObjectsRequest listObjectsRequest = new ListObjectsRequest(this.sourceBucketName, this.sourcePrefix, "", delimiter, 300);
 		ObjectListing listing = client.listObjects(listObjectsRequest);
 
 		boolean loop = false;
@@ -107,6 +112,7 @@ public class PhotoService {
 		while(loop) {
 			LOGGER.info("Got object list. Listing {} objects.", listing.getObjectSummaries().size());
 			// Process each key
+			List<Photo> existingPhotoEntries;
 			for(S3ObjectSummary prefix : listing.getObjectSummaries()) {
 				LOGGER.info("Key: {}", prefix.getKey());
 				// This is where the processor needs to go
@@ -115,8 +121,15 @@ public class PhotoService {
 					ObjectMetadata metaData = client.getObjectMetadata(this.sourceBucketName, prefix.getKey());
 					if(metaData.getContentType().equals("application/x-directory")) continue;
 					// Process files
-					Photo photo = PhotoProcessing.processPhoto(client, this.sourceBucketName, prefix.getKey(), this.targetBucketName, this.targetPrefix);
-					this.save(photo);
+					existingPhotoEntries = this.photoDb.findByOriginalFilename(prefix.getKey());
+					if(existingPhotoEntries == null || existingPhotoEntries.size() <= 0) {
+						Photo photo = PhotoProcessing.processPhoto(client, this.sourceBucketName, prefix.getKey(), this.targetBucketName, this.targetPrefix);
+						if(photo != null) {
+							this.save(photo);
+						}
+					} else {
+						LOGGER.info("Skipping already processed file: {}", prefix.getKey());
+					}
 				} catch(IOException e) {
 					LOGGER.warn("There was a problem processing file: {}", prefix.getKey(), e);
 				}

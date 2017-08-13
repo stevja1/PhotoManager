@@ -1,3 +1,8 @@
+@font-face {
+    font-family: handwriting;
+    src: url(/images/handwriting_font.woff2);
+}
+
 body {
     margin: 0px;
     padding: 0px;
@@ -54,4 +59,24 @@ button {
 button img {
     padding: 0px;
     margin: 0px;
+}
+
+div.albumIcon {
+    margin: 5px;
+    border: 1px solid #ccc;
+    float: left;
+    width: 256px;
+    background-color: #fff;
+    color: black;
+}
+
+div.albumIcon img {
+    width: 100%;
+    height: auto;
+}
+
+div.albumIconLabel {
+    padding: 15px;
+    text-align: center;
+    font-family: handwriting;
 }

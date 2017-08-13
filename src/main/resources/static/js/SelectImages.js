@@ -1,6 +1,7 @@
 function selectImages(albumId) {
+    view = "view_photos_without_album";
     console.log("Getting album photo information.");
-    var photoPromise = PhotoAPI.getPhotosWithoutAlbum(0);
+    var photoPromise = PhotoAPI.getPhotosWithoutAlbum(page);
     photoPromise.then(function(result) {
         $("#header").html("Add Images to Album");
         var container = $("#componentContainer");
@@ -18,11 +19,11 @@ function selectImages(albumId) {
             imageOption.addClass("item");
             imagePicker.append(imageOption);
         }
+        imagePicker.imagepicker();
         var addButton = $(document.createElement('img'));
         addButton.attr("src", "images/addPhotosToAlbum.png");
         addButton.attr("onClick", "addPhotosToAlbum("+albumId+")");
         container.append(addButton);
-        $("#imagePickerContainer").imagepicker();
     }, function(err) {
         console.log("There was a problem fetching images without an album.");
         console.log(err);
@@ -54,3 +55,31 @@ function addPhotosToAlbum(albumId) {
         console.log(err);
     });
 }
+
+$(window).scroll(function() {
+    if(view != "view_photos_without_album") {
+        return;
+    }
+    if($(window).scrollTop() + $(window).height() == $(document).height()
+      && $(window).height() != $(document).height()) {
+        ++page;
+        var imagePicker = $("#imagePickerContainer");
+        var photoPromise = PhotoAPI.getPhotosWithoutAlbum(page);
+        photoPromise.then(function(result) {
+            for(var i = 0; i < result.length; ++i) {
+                photoId = result[i].photoId;
+                var imageOption = $(document.createElement('option'));
+                imageOption.attr("data-img-src", "/thumbnail/"+photoId);
+                imageOption.attr("value", photoId);
+                imageOption.addClass("item");
+                imagePicker.append(imageOption);
+            }
+            console.log("Refreshing the image picker...");
+            // For some reason, this doesn't work well with Safari.
+//            imagePicker.data('picker').sync_picker_with_select();
+            $("#imagePickerContainer").imagepicker();
+        }, function(err) {
+            console.log("There was a problem loading additional photos.");
+        });
+    }
+});

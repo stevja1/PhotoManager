@@ -1,4 +1,5 @@
 function viewAlbum(albumId) {
+    view = "view_album";
     console.log("Getting album photo information.");
     var albumPromise = AlbumAPI.get(albumId);
     
@@ -9,10 +10,13 @@ function viewAlbum(albumId) {
         var container = $("#componentContainer");
         container.empty();
         
-        var image = $(document.createElement('img'));
-        image.attr("src", "/images/backToAlbums.png");
-        image.attr("onClick", "viewAlbums()");
-        container.append(image);
+        var backButton = $(document.createElement('img'));
+        backButton.attr("src", "/images/backToAlbums.png");
+        backButton.attr("onClick", "viewAlbums()");
+        container.append(backButton);
+        
+        var imageContainer = $(document.createElement("div"));
+        container.append(imageContainer);
         
         var photoId;
         var image;
@@ -21,7 +25,7 @@ function viewAlbum(albumId) {
 
             image = $(document.createElement('img'));
             image.attr("src", "/thumbnail/"+photoId);
-            container.append(image);
+            imageContainer.append(image);
         }
         var addPhotosToAlbumButton = $(document.createElement('button'));
         var buttonImage = $(document.createElement('img'));
